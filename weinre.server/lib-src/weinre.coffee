@@ -137,6 +137,24 @@ startServer = () ->
     app.use express.favicon(favIcon)
 
     app.use jsonBodyParser()
+    app.all /^\/ids(.*)/, (request, response, next) ->
+        response.contentType('text/html');
+        channels = channelManager.getChannels();
+        htmls = [
+            '<DOCTYPE HTML>',
+            '<html>',
+                '<head><title>id list</title></head>',
+                '<body>',
+                    '<h1>' + channels.length + ' remote targets connected: </h1>',
+                    '<ol>',
+                        channels.map (c) ->
+                            return '<li><a href="/client/#' + c.id + '" target="_blank">' + c.remoteAddress + '_' + c.id + '</a></li>'
+                        .join('\n'),
+                    '</ol>',
+                '</body>',
+            '</html>'
+        ]
+        return response.send(htmls.join('\n'))
 
     app.all /^\/ws\/client(.*)/, (request, response, next) ->
         uri = request.params[0]

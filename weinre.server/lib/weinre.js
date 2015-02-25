@@ -133,6 +133,17 @@ startServer = function() {
   });
   app.use(express.favicon(favIcon));
   app.use(jsonBodyParser());
+  app.all(/^\/ids(.*)/, function(request, response, next) {
+    var channels, htmls;
+    response.contentType('text/html');
+    channels = channelManager.getChannels();
+    htmls = [
+      '<DOCTYPE HTML>', '<html>', '<head><title>id list</title></head>', '<body>', '<h1>' + channels.length + ' remote targets connected: </h1>', '<ol>', channels.map(function(c) {
+        return '<li><a href="/client/#' + c.id + '" target="_blank">' + c.remoteAddress + '_' + c.id + '</a></li>';
+      }).join('\n'), '</ol>', '</body>', '</html>'
+    ];
+    return response.send(htmls.join('\n'));
+  });
   app.all(/^\/ws\/client(.*)/, function(request, response, next) {
     var uri;
     uri = request.params[0];
